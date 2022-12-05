@@ -11,17 +11,18 @@ float noise(float x){
 float sdf(vec2 uv)
 {
     float a = acos(dot(normalize(uv),vec2(1.,0.))) * 0.06;
-    float n = noise(a * 20. + iTime) * 0.04f;
+    float n = noise(a * 10. + iTime) * 0.06;
     return 0.25f - length(uv) + n;
-}
+} 
 void mainImage( out vec4 fragColor, in vec2 fragCoord )
 {
     vec3 col = vec3(0);
     vec2 uv = fragCoord / iResolution.xy - vec2(0.5f);
     float y = sdf(uv);
     col.g = smoothstep(0.,0.25,y);
-    if(y < 0.0)
-        col = smoothstep(0.,0.5,abs(y)) * vec3(0.2,0,1);
+     if(y < 0.0)
+         col = smoothstep(0.,0.5,abs(y)) * vec3(0.2,0,1);
     //col += sin(abs(y*100.) );
     fragColor = vec4(col,1);
+    //fragColor = vec4(0,1,1,1);
 }
