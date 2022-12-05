@@ -1,3 +1,4 @@
+#define PI 3.1415926538
 float random(float x){
     return fract(sin(x)*12561.1516);
 }
@@ -10,8 +11,9 @@ float noise(float x){
 
 float sdf(vec2 uv)
 {
-    float a = acos(dot(normalize(uv),vec2(1.,0.))) * 0.06;
-    float n = noise(a * 10. + iTime) * 0.06;
+    float a = acos(dot(normalize(uv),vec2(0.99,0.)));
+    a /= PI;
+    float n = noise(a * 0.3 * 10. + iTime) * 0.06;
     return 0.25f - length(uv) + n;
 } 
 void mainImage( out vec4 fragColor, in vec2 fragCoord )
