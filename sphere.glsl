@@ -8,7 +8,7 @@
 #define LIGHT_DIFFUSE vec3(1)
 #define LIGHT_SPECULAR vec3(1)
 #define VIEW_POS vec3(0,0,-1)
-#define SHININESS 100.
+#define SHININESS 50.
 
 vec2 fixUV(vec2 c)
 {
@@ -16,20 +16,20 @@ vec2 fixUV(vec2 c)
 }
 float sdf(vec3 uv)
 {
-    return length(uv + vec3(0,0,-0.7)) - 0.5f;
+    return length(uv + vec3(0,0,-0.5)) - 0.5f;
 }
-float rayMarch(vec3 vp,vec3 dir){
+float rayMarch(in vec3 ro, in vec3 rd) {
     float t = TMIN;
-    for(int i = 0;i < RAY_MARCH_TIMES && t < TMAX;++i)
-    {
-        vec3 p = vp + t * dir;
+    for(int i = 0; i < RAY_MARCH_TIMES && t < TMAX; i++) {
+        vec3 p = ro + t * rd;
         float d = sdf(p);
-        if(abs(d) <= PRECISION)
-            return d;
+        if(d < PRECISION)
+            break;
         t += d;
     }
     return t;
 }
+
 vec3 calcNormal(vec3 p) // for function f(p)
 {
     const float h = 0.0001; // replace by an appropriate value
@@ -50,7 +50,7 @@ vec3 render(vec3 cp,vec2 uv)
         return vec3(0);
     vec3 world_pos = vp + normalize(dir) * dist; 
     vec3 nor = calcNormal(world_pos);
-    vec3 ambient = 0.01 * LIGHT_AMBIENT * col;
+    vec3 ambient = 0.06 * LIGHT_AMBIENT * col;
     //diffuse
     vec3 L = normalize(light_pos - world_pos);
     float diff = max(dot(nor, L),0.);
