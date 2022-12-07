@@ -16,7 +16,7 @@ vec2 fixUV(vec2 c)
 }
 float sdf(vec3 uv)
 {
-    return length(uv + vec3(0,0,-0.5)) - 0.2f;
+    return length(uv + vec3(0,0,-0.5)) - 0.5f;
 }
 float rayMarch(vec3 vp,vec3 dir){
     float t = TMIN;
