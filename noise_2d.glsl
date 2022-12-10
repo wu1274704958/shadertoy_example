@@ -26,7 +26,7 @@ float calcNoise(vec3 p)
     np.x = acos(dot(normalize(noz),vec3(0.99,0.,0.))) / PI;
     vec3 noy = vec3(0.,p.yz);
     np.y = acos(dot(normalize(noy),vec3(0.,0.99,0.))) / PI;
-    return noise(np * 3. + iTime) * 0.06;
+    return noise(np * 3. + iTime) * 0.08;
 }
 
 #define TMIN 0.01f
@@ -45,10 +45,48 @@ vec2 fixUV(vec2 c)
 {
     return (c - iResolution.xy * 0.5f) / min(iResolution.x, iResolution.y); 
 }
-float sdf(vec3 uv)
+float sdfSphere(vec3 uv)
 {
     float n = calcNoise(uv);
     return length(uv + vec3(0,0,-0.5)) - 0.5f + n;
+}
+float sdfcube(vec3 p,vec3 r)
+{
+    vec3 b = abs(p) - r;
+    return length(max(b, 0.)) + min(max(max(b.x, b.y), b.z), 0.);
+}
+float sdCylinder(vec3 p, vec3 a, vec3 b, float r)
+{
+    vec3  ba = b - a;
+    vec3  pa = p - a;
+    float baba = dot(ba,ba);
+    float paba = dot(pa,ba);
+    float x = length(pa*baba-ba*paba) - r*baba;
+    float y = abs(paba-baba*0.5)-baba*0.5;
+    float x2 = x*x;
+    float y2 = y*y*baba;
+    
+    float d = (max(x,y)<0.0)?-min(x2,y2):(((x>0.0)?x2:0.0)+((y>0.0)?y2:0.0));
+    
+    return sign(d)*sqrt(abs(d))/baba;
+}
+
+// vertical cylinder
+float sdCylinder( vec3 p, float h, float r )
+{
+  vec2 d = abs(vec2(length(p.xz),p.y)) - vec2(r,h);
+  return min(max(d.x,d.y),0.0) + length(max(d,0.0));
+}
+
+float map( in vec3 pos )
+{
+    return sdCylinder(pos, vec3(0), vec3(0,0,1), 0.14 );
+}
+float sdf(vec3 uv)
+{
+    //return map(uv);
+    //return max(sdfSphere(uv), -1. * map(uv));
+    return max(sdfSphere(uv), -1. * sdfcube(uv,vec3(0.1,0.1,1)));
 }
 float rayMarch(in vec3 ro, in vec3 rd) {
     float t = TMIN;
@@ -73,7 +111,7 @@ vec3 calcNormal(vec3 p) // for function f(p)
 }
 vec3 render(vec3 cp,vec2 uv)
 {
-    vec3 light_pos = vec3(sin(iTime) * 2.,1,cos(iTime) * 2.);
+    vec3 light_pos = vec3(sin(iTime) * 5.,1,cos(iTime)*10.);
     vec3 dir = vec3(uv,0) - cp;
     vec3 vp = cp + dir;
     float dist = rayMarch(vp,normalize(dir));
